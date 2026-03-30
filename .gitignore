@@ -1,0 +1,53 @@
+# Dataset (large, downloaded at runtime)
+data/
+*.tar.gz
+
+# Model weights (large binary files)
+models/*.pth
+models/*.pt
+
+# Results (regenerated from notebooks)
+results/figures/*.png
+results/metrics/*.json
+results/metrics/*.csv
+
+# Keep directory structure
+!results/figures/.gitkeep
+!results/metrics/.gitkeep
+!models/.gitkeep
+!data/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+*.zip
