@@ -21,13 +21,13 @@ NutriVision is a deep learning pipeline that takes a photo of food and identifie
 
 ## How to Run
 
-**Google Colab (recommended):** open any notebook below, set runtime to GPU (T4), run all cells.
+**Google Colab (recommended):** Open any notebook in the `notebooks/` directory, set runtime to GPU (T4), and run all cells.
 
 **Local:**
 ```bash
 pip install -r requirements.txt
-jupyter notebook notebooks/Level1_Classification.ipynb   # Level 1
-jupyter notebook notebooks/Level2_Nutrition_Pipeline.ipynb  # Level 2
+jupyter notebook notebooks/Level1_Classification.ipynb     # Level 1
+jupyter notebook notebooks/Level2_Nutrition_Pipeline.ipynb # Level 2
 jupyter notebook notebooks/Level3_Demo.ipynb             # Level 3 + Gradio demo
 ```
 
@@ -49,30 +49,39 @@ The hardest classes to distinguish were visually similar pairs — steak vs. fil
 ```
 NutriVision/
 ├── notebooks/
-│   ├── Level1_Classification.ipynb      # training + evaluation
-│   ├── Level2_Nutrition_Pipeline.ipynb  # nutrition pipeline + advanced training
-│   └── Level3_Demo.ipynb               # Grad-CAM + Gradio demo
+│ ├── Level1_Classification.ipynb      # training + evaluation
+│ ├── Level2_Nutrition_Pipeline.ipynb  # nutrition pipeline + advanced training
+│ └── Level3_Demo.ipynb               # Grad-CAM + Gradio demo
 ├── src/
-│   ├── dataset.py       # Food-101 loading and transforms
-│   ├── models.py        # ResNet-50 and MobileNetV3 setup
-│   ├── train.py         # two-phase training loop
-│   ├── evaluate.py      # metrics and prediction utilities
-│   ├── utils.py         # plotting helpers
-│   └── nutrition.py     # USDA nutrition database + lookup functions
+│ ├── dataset.py     # Food-101 loading and transforms
+│ ├── models.py      # ResNet-50 and MobileNetV3 setup
+│ ├── train.py       # two-phase training loop
+│ ├── evaluate.py    # metrics and prediction utilities
+│ ├── utils.py       # plotting helpers
+│ └── nutrition.py   # USDA nutrition database + lookup functions
 ├── configs/
-│   └── default.yaml
+│ └── default.yaml
 ├── results/
-│   ├── figures/         # training curves, confusion matrices, Grad-CAM
-│   └── metrics/         # classification report CSV, results JSON
-├── models/              # saved .pth weights (git-ignored)
-├── docs/                # proposal and summary report
+│ ├── figures/  # training curves, confusion matrices, Grad-CAM
+│ └── metrics/  # classification reports, results JSON
+├── models/     # saved .pth weights (git-ignored)
+├── docs/       # proposal and final research paper
+│   ├── Nutrivision_Final_Paper.pdf    # IEEE conference format final paper
+│   ├── proposal.pdf                    # initial project proposal
+│   └── Nutrivision_Final_Paper.tex    # LaTeX source
+├── data/       # Food-101 dataset (downloaded automatically)
 ├── requirements.txt
 └── README.md
 ```
 
 ## Dataset
 
-[Food-101](https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/) — 101 food categories, 101,000 images (750 train / 250 test per class). Not included in the repo; downloaded automatically via `torchvision`.
+[Food-101](https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/) — 101 food categories, 101,000 images (750 train / 250 test per class). Automatically downloaded via `torchvision` when running the notebooks.
+
+## Documentation
+
+- **Final Paper**: [docs/Nutrivision_Final_Paper.pdf](docs/Nutrivision_Final_Paper.pdf) - Complete IEEE conference format paper documenting methodology, results, and analysis
+- **Project Proposal**: [docs/proposal.pdf](docs/proposal.pdf) - Initial project proposal and timeline
 
 ## References
 
