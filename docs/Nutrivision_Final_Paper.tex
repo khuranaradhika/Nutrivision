@@ -1,0 +1,399 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{NutriVision: Image-Based Food Recognition and Nutritional Estimation}
+\author{\IEEEauthorblockN{Radhika Khurana}
+\IEEEauthorblockA{\textit{Master's in AI} \\
+\textit{Northeastern University}\\
+Boston, MA, USA \\
+khurana.rad@northeastern.edu}
+}
+\maketitle
+
+\noindent\textbf{Abstract}
+
+NutriVision identifies food from images and predicts nutritional information using the USDA FoodData Central database. We trained on Food-101 using two-phase transfer learning. Our ResNet-50 model achieved 82.95\% Top-1 and 96.18\% Top-5 accuracy. MobileNetV3-Large reached 76.25\% Top-1 and 93.43\% Top-5 accuracy. The system reports calories, protein, carbohydrates, fat, and fiber per serving (45-500g depending on food type). We added Grad-CAM to visualize model decisions and built a Gradio demo for real-time use. The biggest confusion errors were between similar foods: steak vs filet mignon (50 errors) and chocolate cake vs chocolate mousse (23 errors). This shows that transfer learning can build practical food recognition systems for dietary monitoring.
+
+\noindent\textbf{Keywords}
+
+food recognition, computer vision, transfer learning, MobileNetV3, ResNet-50, nutritional estimation, Grad-CAM, deep learning, dietary assessment, Food-101
+
+\section{Introduction}
+Dietary monitoring and nutritional awareness are critical components of public health and personal wellness, with diet-related chronic diseases affecting millions globally. Traditional food logging methods rely on manual entry, which is time-consuming, prone to estimation errors, and suffers from poor user adherence. Studies show that manual food diaries have completion rates below 50\% over extended periods, limiting their effectiveness for longitudinal studies and clinical interventions. With the ubiquity of smartphones equipped with high-quality cameras and increasing computational capabilities, image-based food recognition presents a transformative opportunity to automate dietary assessment and provide immediate nutritional feedback.
+
+However, accurate food identification remains challenging due to several factors: visual similarity between dishes with subtle ingredient variations, significant intra-class variation in appearance due to preparation methods, regional presentation differences, lighting and camera variations, and the vast diversity of global cuisines. Traditional computer vision approaches relying on hand-engineered features struggle with this complexity, motivating the need for deep learning solutions.
+
+In recent years, deep convolutional neural networks (CNNs) have revolutionized computer vision tasks, particularly in image classification. Models such as ResNet \cite{he2016resnet} and MobileNetV3 \cite{howard2019mobilenetv3} have demonstrated exceptional performance on large-scale datasets like ImageNet, which contains over 14 million images across 20,000 categories. However, direct application to food recognition requires careful adaptation, as the Food-101 dataset \cite{bossard2014food101} presents unique challenges: fine-grained distinctions between visually similar classes (e.g., steak vs. filet mignon, chocolate cake vs. chocolate mousse) and significant intra-class variation in appearance, lighting, and composition.
+
+NutriVision addresses these challenges with a three-part approach: food image classification with transfer learning, nutritional mapping using a food database, and model explainability with an interactive demo. We developed a two-phase training strategy. First, we adapt the classification head while keeping the backbone frozen. Then we fine-tune the entire network with different learning rates. This produces better results than standard fine-tuning.
+
+Many groups can benefit from this work. Individuals can track their food intake for weight management. Healthcare providers can monitor patient nutrition. Nutritionists can study dietary patterns. Researchers can build better food logging tools. We provide both a high-accuracy model (ResNet-50) and an efficient version (MobileNetV3). This lets users choose between accuracy and speed for their specific needs.
+
+\section{Objectives and Scope}
+\subsection{Level 1: Food Classification}
+\textbf{Primary Objectives:}
+\begin{itemize}
+    \item Download and preprocess the Food-101 dataset (101 food categories, 101,000 total images)
+    \item Implement two-phase transfer learning for ResNet-50 with differential learning rates
+    \item Train MobileNetV3-Large as a computational-efficient alternative
+    \item Evaluate performance on multiple metrics: Top-1/Top-5 accuracy, confusion matrices, per-class F1-scores, and inference speed
+    \item Identify challenging class pairs and analyze failure modes
+\end{itemize}
+\textbf{Dataset Scope and Partitions:} The Food-101 dataset divides each class into 750 training images and 250 test images. We further split the training set, reserving 10\% (7,500 images) for validation, resulting in 67,500 training images, 7,500 validation images, and 25,250 test images. This split maintains class balance and allows robust model selection without touching the official test set.
+
+\subsection{Level 2: Nutrition Mapping and Multi-Food Handling}
+\textbf{Primary Objectives:}
+\begin{itemize}
+    \item Map food predictions to nutritional information from USDA FoodData Central
+    \item Implement serving size estimation with per-serving nutritional calculation
+    \item Provide macronutrient breakdown (calories, protein, carbohydrates, fat, fiber)
+    \item Develop error handling for ambiguous predictions and multiple food items
+    \item Create nutrition comparison tools for similar food categories
+\end{itemize}
+\textbf{Database Scope:} We compiled nutritional values for all 101 food classes from USDA FoodData Central, including per-100g values for calories, protein (g), carbohydrates (g), fat (g), and fiber (g). Typical serving sizes were determined based on USDA guidelines and restaurant industry standards, ranging from 45g (macarons) to 500g (pho, ramen).
+
+\subsection{Level 3: Explainability and Interactive Demo}
+\textbf{Primary Objectives:}
+\begin{itemize}
+    \item Implement Grad-CAM visualization to highlight discriminative regions contributing to predictions
+    \item Create an interactive Gradio web interface for real-time inference accessible to non-technical users
+    \item Generate visual explanations that increase model transparency and user trust
+    \item Deploy a user-friendly demo showcasing full pipeline functionality from upload to nutritional label
+    \item Demonstrate practical utility for dietary monitoring applications
+\end{itemize}
+\textbf{Deployment Scope:} Gradio demo provides browser-based interface requiring no local installation. Grad-CAM visualizations help users understand model decisions and validate predictions. System operates in real-time with sub-100ms inference latency.
+
+\subsection{Assumptions and Limitations}
+\textbf{Key Assumptions:}
+\begin{itemize}
+    \item Single dominant food item per image (primary target use case)
+    \item Standard serving sizes based on USDA dietary guidelines
+    \item Access to GPU acceleration for training (results obtained on NVIDIA T4 GPU)
+    \item Representative training data covering diverse presentations, lighting conditions, and preparation styles for each food class
+    \item User capture quality similar to Food-101 (adequate lighting, reasonable framing)
+\end{itemize}
+\textbf{Considerations Outside Current Scope:}
+\begin{itemize}
+    \item Multi-food detection and segmentation (would require instance segmentation with Mask R-CNN or YOLO)
+    \item Personalized portion size estimation using reference objects (e.g., coins, credit cards)
+    \item Video-based continuous meal logging from dining sessions
+    \item Ingredient-level recognition and recipe reconstruction for complex dishes
+    \item Micronutrient tracking beyond macronutrients (vitamins, minerals)
+    \item Integration with mobile applications and wearable devices
+    \item Real-time feedback during meal preparation and cooking
+\end{itemize}
+
+\section{Methods}
+\subsection{Dataset and Preprocessing}
+We trained on Food-101 \cite{bossard2014food101}. This dataset has 101 food types with 1,000 images each (750 training, 250 test). Images vary in lighting, camera angles, presentation, and preparation styles. The food classes include common items like hamburger and pizza as well as specialty dishes like foie gras and beef tartare.
+
+\textbf{Data Augmentation:} We applied data augmentation to prevent overfitting:
+\begin{itemize}
+    \item Random resized cropping with scale range (0.8, 1.0) and aspect ratio (0.75, 1.33)
+    \item Random horizontal flipping (probability 0.5)
+    \item Random rotation up to 15\textdegree
+    \item Color jittering for brightness (0.2), contrast (0.2), and saturation (0.2)
+    \item Gaussian blur (kernel size 3$\times$3, sigma 0.1) for robustness
+\end{itemize}
+For validation and test sets, we used center cropping after resizing to 256px to maintain consistent evaluation conditions.
+
+\textbf{Normalization:} All images were normalized using ImageNet statistics: mean $[0.485, 0.456, 0.406]$ and standard deviation $[0.229, 0.224, 0.225]$ to maintain compatibility with pre-trained model expectations.
+
+\subsection{Two-Phase Transfer Learning Strategy}
+Our training methodology addresses the critical challenge of adapting large pre-trained models to food recognition while preventing catastrophic forgetting and achieving rapid convergence. The two-phase approach systematically introduces task-specific adaptation while preserving general visual features learned from ImageNet.
+
+\textbf{Phase 1 (5 epochs):} We freeze all backbone parameters and train only the randomly initialized classification head. This phase achieves rapid initial adaptation, with ResNet-50 reaching 65\% accuracy within just 5 epochs. We use a learning rate of $10^{-3}$ with Adam optimizer.
+
+\textbf{Phase 2 (15 epochs):} We unfreeze the entire network and train for up to 15 additional epochs with different learning rates: backbone $10^{-5}$ (conservative to maintain general features) and head $10^{-4}$ (higher rate for task adaptation). This follows the insight that earlier layers capture more general features while later layers become task-specific.
+
+We implement ReduceLROnPlateau scheduling with factor 0.5 and patience 2 epochs. Early stopping triggers after 5 epochs without validation improvement to prevent overfitting.
+
+\subsection{Model Architectures}
+\textbf{ResNet-50:} ResNet-50 \cite{he2016resnet} uses residual connections to enable training of deep networks. We replace the final fully connected layer with Sequential(Dropout(0.3), Linear(2048, 101)). Total parameters: 23.7M. The model achieves 82.95\% Top-1 accuracy with 5.6ms average inference time.
+
+\textbf{MobileNetV3-Large:} MobileNetV3-Large \cite{howard2019mobilenetv3} uses inverted residuals and squeeze-and-excitation modules for efficient mobile deployment. We replace the final classifier layer with Linear(1280, 101). Total parameters: 4.3M (5.5$\times$ fewer than ResNet-50). The model achieves 76.25\% Top-1 accuracy with 4.6ms inference time (20\% faster).
+
+\subsection{Evaluation Metrics}
+We compute:
+\begin{itemize}
+    \item Top-1 and Top-5 classification accuracy
+    \item Per-class precision, recall, F1-score, and support
+    \item Confusion matrix for error pattern analysis
+    \item Macro-averaged F1-score across all 101 classes
+    \item Inference speed (milliseconds per image)
+    \item Model size (parameter count and memory footprint)
+\end{itemize}
+
+\subsection{Nutrition Mapping and Database Construction}
+We built a nutritional database using USDA FoodData Central values. For each of the 101 food classes, we store calories, protein, carbohydrates, fat, and fiber (all per 100g).
+
+Nutritional estimation follows:
+\begin{equation}
+\text{per-serving value} = \frac{\text{serving size (g)}}{100} \times \text{per-100g value}
+\end{equation}
+
+Serving size determination uses USDA guidelines and restaurant standards ranging from 45g (macarons) to 500g (pho, ramen). We provide both per-100g and per-serving nutrition labels for flexibility.
+
+\subsection{Grad-CAM Implementation for Explainability}
+We implemented Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{selvaraju2017gradcam}. Grad-CAM uses gradients flowing into the final convolutional layer to produce a localization map highlighting important regions for predictions.
+
+For ResNet-50, we extract features from the final convolutional block (layer4). For MobileNetV3, we use the final features module. The resulting heatmaps are overlaid on original images with transparency to highlight regions of model attention.
+
+\subsection{Interactive Gradio Demo}
+We deployed a Gradio interface that provides:
+\begin{itemize}
+    \item Drag-and-drop image upload with preprocessing pipeline
+    \item Model inference with prediction confidence scores
+    \item Top-5 predictions ranked by probability
+    \item Grad-CAM visualization side-by-side with original image
+    \item Formatted nutritional label with per-serving macronutrients
+    \item Comparison mode for multiple food images
+\end{itemize}
+The demo runs on GPU with sub-100ms latency, providing real-time feedback suitable for mobile deployment.
+
+\section{Results and Discussion}
+\subsection{Classification Performance}
+Table~\ref{tab:performance} shows how well both models work:
+
+\begin{table}[htbp]
+\caption{Model Performance Comparison}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Top-1 Acc} & \textbf{Top-5 Acc} & \textbf{Params} & \textbf{Inference} \\
+\midrule
+ResNet-50 & 82.95\% & 96.18\% & 23.7M & 5.6 ms \\
+MobileNetV3-Large & 76.25\% & 93.43\% & 4.3M & 4.6 ms \\
+\midrule
+\textbf{Difference} & +6.70\% & +2.75\% & 5.5$\times$ & +22\% \\
+\bottomrule
+\end{tabular}
+\label{tab:performance}
+\end{center}
+\end{table}
+
+\textbf{ResNet-50} achieves 82.95\% Top-1 accuracy, representing strong performance on Food-101. The 96.18\% Top-5 accuracy indicates the model correctly places the true class within its top 5 predictions for nearly all test images. With 23.7M parameters, ResNet-50 provides substantial representational capacity.
+
+\textbf{MobileNetV3-Large} achieves 76.25\% Top-1 accuracy, trailing ResNet-50 by 6.7\% but offering compelling efficiency advantages. The model contains only 4.3M parameters (5.5$\times$ fewer) and runs 22\% faster (4.6ms vs 5.6ms).
+
+\subsection{Training Dynamics}
+Both models benefited significantly from the two-phase training strategy. Figure~\ref{fig:training_curves} shows training and validation curves for both models over 20 epochs, clearly illustrating the two-phase structure with a vertical line at epoch 5 marking the transition.
+
+Phase 1 (head-only, epochs 1-5) achieves rapid initial adaptation, with ResNet-50 reaching 65\% accuracy within just 5 epochs. The loss decreases smoothly as the classification head adapts to food-specific features from the frozen backbone. MobileNetV3 similarly reaches 50\% accuracy in Phase 1.
+
+Phase 2 (full fine-tuning, epochs 6-20) provides steady improvement, with ResNet-50 gaining an additional 18\% accuracy over 15 epochs. The differential learning rate strategy prevents catastrophic forgetting and lets the model adapt to the task. Without this approach, full fine-tuning from the start resulted in 3-5\% lower final accuracy.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/resnet-50_training_curves.png}
+\includegraphics[width=0.95\columnwidth]{../results/figures/mobilenetv3_training_curves.png}
+\caption{Training curves showing loss and accuracy for both phases. Top: ResNet-50. Bottom: MobileNetV3. Vertical dashed line marks Phase 2 start.}
+\label{fig:training_curves}
+\end{figure}
+
+\subsection{Error Analysis and Confusion Patterns}
+Table~\ref{tab:confused} lists the most frequent misclassification pairs, revealing systematic patterns reflecting visual similarity and structural ambiguity:
+
+\begin{table}[htbp]
+\caption{Most Confused Class Pairs (Top 10)}
+\begin{center}
+\begin{tabular}{llc}
+\toprule
+\textbf{True Class} & \textbf{Predicted} & \textbf{Count} \\
+\midrule
+Steak & Filet Mignon & 50 \\
+Tuna Tartare & Beef Tartare & 33 \\
+Pork Chop & Filet Mignon & 30 \\
+Filet Mignon & Steak & 29 \\
+Chocolate Cake & Chocolate Mousse & 23 \\
+Chocolate Mousse & Chocolate Cake & 22 \\
+Apple Pie & Bread Pudding & 21 \\
+Pork Chop & Steak & 19 \\
+Beef Tartare & Tuna Tartare & 18 \\
+Ice Cream & Frozen Yogurt & 17 \\
+\bottomrule
+\end{tabular}
+\label{tab:confused}
+\end{center}
+\end{table}
+
+These errors fall into three structural categories:
+
+\textbf{1. Protein-type confusion:} Steak, filet mignon, and pork chop confusion (50+29+19+13 errors). Visually, these appear similar—grilled/browned meat with similar textures. Distinguishing requires attention to fat distribution, grain structure, and precise cooking characteristics.
+
+\textbf{2. Preparation-method similarity:} Chocolate cake vs. chocolate mousse (23+22 errors) reflects similar chocolate color and texture. Tuna tartare vs. beef tartare (33+18 errors) share identical preparation (raw, diced, seasoned) differing only in protein.
+
+\textbf{3. Dairy-frozen dessert confusion:} Ice cream vs. frozen yogurt (17 errors) share appearance, texture, and typical serving contexts, differing primarily in taste and fermentation (not visible).
+
+Figure~\ref{fig:confusion_full} shows the complete confusion matrix demonstrating strong diagonal dominance and isolated off-diagonal clusters reflecting food subcategory similarities.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/confusion_matrix_full.png}
+\caption{Complete confusion matrix showing strong diagonal with isolated off-diagonal patterns reflecting visual similarities between related dishes.}
+\label{fig:confusion_full}
+\end{figure}
+
+For detailed analysis, Figure~\ref{fig:confusion_worst} shows the confusion submatrix for the 15 most challenging classes, revealing that errors concentrate within food subcategories where visual similarity is highest.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/confusion_matrix_worst15.png}
+\caption{Confusion matrix for 15 most challenging classes, showing concentrated errors within food subcategories.}
+\label{fig:confusion_worst}
+\end{figure}
+
+\subsection{Sample Predictions and Failure Analysis}
+Figure~\ref{fig:correct_samples} demonstrates correct predictions across diverse food categories, showing robustness to lighting, plating, and composition variations. The model successfully handles simple items (apple pie, ice cream) to complex dishes (pad thai, paella).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/sample_correct_predictions.png}
+\caption{Correct predictions across diverse food categories demonstrating robustness.}
+\label{fig:correct_samples}
+\end{figure}
+
+Figure~\ref{fig:incorrect_samples} illustrates representative failure cases typically resulting from overexposure, unusual angles, extreme close-ups, multiple foods in frame, or heavy sauces obscuring base characteristics. These failures suggest future improvements in data augmentation and multi-label classification.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/sample_incorrect_predictions.png}
+\caption{Failure cases typically caused by poor lighting, unusual angles, or contextual ambiguity.}
+\label{fig:incorrect_samples}
+\end{figure}
+
+\subsection{Top-5 Prediction Analysis}
+Figure~\ref{fig:top5_preds} demonstrates Top-5 predictions for challenging cases. The model learns meaningful food hierarchies, placing related items (sushi/sashimi, different preparations) in top positions. This proves useful for user interfaces where presenting Top-5 predictions allows users to select the correct item when confidence is low.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/top5_predictions.png}
+\caption{Top-5 predictions for challenging test images, demonstrating learned semantic hierarchies.}
+\label{fig:top5_preds}
+\end{figure}
+
+\subsection{Nutrition Estimation Results}
+The system provides per-serving estimates for all 101 foods:
+\begin{itemize}
+    \item Apple Pie (125g serving): 296 kcal, 2.5g protein, 42.5g carbs, 13.8g fat
+    \item Grilled Salmon (200g serving): 374 kcal, 50g protein, 0g carbs, 18g fat
+    \item Caesar Salad (200g serving): 210 kcal, 8g protein, 14g carbs, 16g fat
+    \item Pepperoni Pizza (200g serving): 532 kcal, 22g protein, 66g carbs, 20g fat
+\end{itemize}
+
+Figure~\ref{fig:calorie_dist} shows calorie distribution across food categories. Desserts cluster at 300-500 kcal per serving, entrees at 400-600 kcal, and vegetables/salads at 50-200 kcal, matching expected dietary patterns and providing confidence in serving size estimation.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/calorie_distribution.png}
+\caption{Calorie distribution across food categories showing realistic clustering by food type.}
+\label{fig:calorie_dist}
+\end{figure}
+
+Figure~\ref{fig:cal_vs_protein} shows the relationship between calories and protein. High-protein items like sashimi, grilled salmon, and steak cluster separately from desserts and fried foods. This helps users understand nutritional differences between foods.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/calories_vs_protein.png}
+\caption{Calories vs. protein scatter plot showing high-protein items separating from high-calorie desserts.}
+\label{fig:cal_vs_protein}
+\end{figure}
+
+\subsection{Grad-CAM Explainability Results}
+Figure~\ref{fig:gradcam_examples} shows Grad-CAM visualizations highlighting discriminative regions: pizza (cheese texture and pepperoni distribution), salad (vegetable patterns), steak (grill marks), and desserts (layering).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/gradcam_examples.png}
+\caption{Grad-CAM visualizations highlighting discriminative regions for different food categories.}
+\label{fig:gradcam_examples}
+\end{figure}
+
+Figure~\ref{fig:gradcam_compare} contrasts correct vs. incorrect prediction patterns. Correct predictions focus on food-specific features; failures show dispersed attention on background or ambiguous regions.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/gradcam_correct_vs_wrong.png}
+\caption{Comparison of Grad-CAM patterns for correct (top) vs. incorrect (bottom) predictions.}
+\label{fig:gradcam_compare}
+\end{figure}
+
+\section{Extra Credit: Multi-Food Analysis}
+We extended the pipeline to handle multi-food scenarios using a sliding window approach detecting 2-3 foods per image with 65\% accuracy. Figure~\ref{fig:multi_food} shows the multi-food detection grid output.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/multi_food_grid.png}
+\caption{Multi-food detection identifying multiple items within a single image.}
+\label{fig:multi_food}
+\end{figure}
+
+The Gradio demo interface (Figure~\ref{fig:demo}) provides complete pipeline functionality with inference, Grad-CAM visualization, and nutritional label generation.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{../results/figures/pipeline_examples.png}
+\caption{Interactive Gradio demo showing complete pipeline functionality.}
+\label{fig:demo}
+\end{figure}
+
+\section{Conclusion and Future Work}
+Two-phase transfer learning works well for food recognition. Our ResNet-50 achieved 82.95\% Top-1 accuracy and MobileNetV3 reached 76.25\%. The nutritional mapping connects computer vision with dietary assessment, giving users immediate per-serving nutrition data. Grad-CAM shows which parts of the image the model uses. The Gradio demo runs in real-time with sub-100ms latency.
+
+\subsection{Key Contributions}
+\begin{itemize}
+    \item Novel two-phase transfer learning with differential learning rates prevents catastrophic forgetting and adapts to the food recognition domain
+    \item Comprehensive evaluation on Food-101 revealing systematic error patterns in fine-grained food recognition
+    \item Integration of USDA nutritional database providing actionable dietary information
+    \item Grad-CAM visualization revealing discriminative food features (textures, grill marks, layering)
+    \item Interactive deployment demonstrating real-world applicability
+\end{itemize}
+
+\subsection{Summary of Achievements (Level 1, 2, 3)}
+\textbf{Level 1 (Completed):} Achieved 82.95\% ResNet-50 accuracy and 76.25\% MobileNetV3 accuracy, exceeding the 75\% target. Created comprehensive evaluation framework with confusion matrices, per-class metrics, and inference speed benchmarking.
+
+\textbf{Level 2 (Completed):} Successfully mapped all 101 classes to USDA nutritional data. Implemented serving size estimation across range 45-500g. Provided per-serving macronutrient breakdowns with realistic distributions.
+
+\textbf{Level 3 (Completed):} Implemented Grad-CAM explainability and deployed interactive Gradio demo with real-time inference, Top-5 predictions, nutritional labels, and macro breakdown percentages.
+
+\subsection{Future Work and Extensions}
+\textbf{Technical Improvements:}
+\begin{itemize}
+    \item Multi-food detection using instance segmentation (Mask R-CNN, YOLO)
+    \item Reference-based portion size estimation using fiducial markers
+    \item Video-based continuous meal logging with temporal consistency
+    \item Few-shot learning for novel food categories with limited data
+\end{itemize}
+
+\textbf{Application Enhancements:}
+\begin{itemize}
+    \item Personalized nutrition recommendations based on dietary restrictions and health conditions
+    \item Integration with food logging applications (MyFitnessPal, Lose It!)
+    \item Restaurant menu analysis providing point-of-decision nutritional information
+    \item Cultural cuisine expansion beyond Food-101 categories
+\end{itemize}
+
+\subsection{Broader Impact}
+NutriVision contributes to addressing the global challenge of dietary-related chronic diseases by automating nutritional assessment. By reducing friction in food logging, the system can improve adherence to dietary recommendations, support weight management programs, and provide valuable data for nutritional research. The browser-based demo democratizes access to AI-powered nutrition tools, potentially benefiting populations without access to registered dietitians.
+
+\section*{Acknowledgment}
+The author thanks the Northeastern University EECE 5639 Computer Vision course instructor and teaching assistants for guidance throughout the project development. Access to GPU resources through Northeastern's computing infrastructure enabled efficient experimentation.
+
+\begin{thebibliography}{00}
+\bibitem{bossard2014food101} L. Bossard, M. Guillaumin, and L. Van Gool, ``Food-101 -- Mining discriminative components with random forests,'' in \textit{ECCV}, 2014.
+\bibitem{he2016resnet} K. He, X. Zhang, S. Ren, and J. Sun, ``Deep residual learning for image recognition,'' in \textit{CVPR}, 2016.
+\bibitem{howard2019mobilenetv3} A. Howard et al., ``Searching for MobileNetV3,'' in \textit{ICCV}, 2019.
+\bibitem{selvaraju2017gradcam} R. R. Selvaraju et al., ``Grad-CAM: Visual explanations from deep networks via gradient-based localization,'' in \textit{ICCV}, 2017.
+\bibitem{paszke2019pytorch} A. Paszke et al., ``PyTorch: An imperative style, high-performance deep learning library,'' in \textit{NeurIPS}, 2019.
+\bibitem{usda2019fdc} U.S. Department of Agriculture, ``FoodData Central,'' 2019. [Online]. Available: \url{https://fdc.nal.usda.gov/}
+\end{thebibliography}
+\end{document}

@@ -1,7 +1,3 @@
-"""
-utils.py — Visualization and general utility functions.
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -11,28 +7,23 @@ from .dataset import denormalize
 
 
 def plot_training_curves(history, model_name, save_path=None):
-    """Plot training/validation loss and accuracy curves."""
     epochs = range(1, len(history['train_loss']) + 1)
     phase_change = sum(1 for p in history['phase'] if p == 1)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
-    # Loss
     ax1.plot(epochs, history['train_loss'], 'b-', label='Train')
     ax1.plot(epochs, history['val_loss'], 'r-', label='Val')
-    ax1.axvline(x=phase_change + 0.5, color='gray', linestyle='--',
-                alpha=0.7, label='Phase 2')
+    ax1.axvline(x=phase_change + 0.5, color='gray', linestyle='--', alpha=0.7, label='Phase 2')
     ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Loss')
     ax1.set_title(f'{model_name} — Loss')
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
-    # Accuracy
     ax2.plot(epochs, history['train_acc'], 'b-', label='Train')
     ax2.plot(epochs, history['val_acc'], 'r-', label='Val')
-    ax2.axvline(x=phase_change + 0.5, color='gray', linestyle='--',
-                alpha=0.7, label='Phase 2')
+    ax2.axvline(x=phase_change + 0.5, color='gray', linestyle='--', alpha=0.7, label='Phase 2')
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('Accuracy (%)')
     ax2.set_title(f'{model_name} — Accuracy')
@@ -46,7 +37,6 @@ def plot_training_curves(history, model_name, save_path=None):
 
 
 def plot_confusion_matrix(cm, class_names, save_path=None, figsize=(24, 20)):
-    """Plot full confusion matrix heatmap."""
     fig, ax = plt.subplots(figsize=figsize)
     names = [c.replace('_', ' ') for c in class_names]
     sns.heatmap(cm, cmap='Blues', ax=ax,
@@ -62,11 +52,8 @@ def plot_confusion_matrix(cm, class_names, save_path=None, figsize=(24, 20)):
     plt.show()
 
 
-def plot_worst_classes_cm(cm, class_names, sorted_classes, top_k=15,
-                          save_path=None):
-    """Plot zoomed confusion matrix for the worst-performing classes."""
-    worst_indices = [class_names.index(n.replace(' ', '_'))
-                     for n, _ in sorted_classes[-top_k:]]
+def plot_worst_classes_cm(cm, class_names, sorted_classes, top_k=15, save_path=None):
+    worst_indices = [class_names.index(n.replace(' ', '_')) for n, _ in sorted_classes[-top_k:]]
     cm_worst = cm[np.ix_(worst_indices, worst_indices)]
     worst_names = [class_names[i].replace('_', ' ') for i in worst_indices]
 
@@ -84,9 +71,7 @@ def plot_worst_classes_cm(cm, class_names, sorted_classes, top_k=15,
     plt.show()
 
 
-def show_sample_predictions(dataset, preds, labels, class_names,
-                             correct=True, n=10, save_path=None):
-    """Display grid of sample correct or incorrect predictions."""
+def show_sample_predictions(dataset, preds, labels, class_names, correct=True, n=10, save_path=None):
     mask = (preds == labels) if correct else (preds != labels)
     indices = np.where(mask)[0]
     np.random.seed(42)
@@ -94,8 +79,7 @@ def show_sample_predictions(dataset, preds, labels, class_names,
 
     rows = (len(sample) + 4) // 5
     fig, axes = plt.subplots(rows, 5, figsize=(18, 4 * rows))
-    status = 'Correct' if correct else 'Incorrect'
-    fig.suptitle(f'Sample {status} Predictions', fontsize=14)
+    fig.suptitle(f'Sample {"Correct" if correct else "Incorrect"} Predictions', fontsize=14)
 
     for ax, idx in zip(axes.flat, sample):
         img, _ = dataset[idx]
@@ -107,11 +91,9 @@ def show_sample_predictions(dataset, preds, labels, class_names,
         if correct:
             ax.set_title(f'✓ {true_name}', fontsize=9, color='green')
         else:
-            ax.set_title(f'True: {true_name}\nPred: {pred_name}',
-                        fontsize=9, color='red')
+            ax.set_title(f'True: {true_name}\nPred: {pred_name}', fontsize=9, color='red')
         ax.axis('off')
 
-    # Hide unused axes
     for ax in axes.flat[len(sample):]:
         ax.axis('off')
 
@@ -121,13 +103,10 @@ def show_sample_predictions(dataset, preds, labels, class_names,
     plt.show()
 
 
-def show_top5_predictions(model, dataset, indices, class_names, device,
-                           save_path=None):
-    """Show images with top-5 predicted classes and confidence bars."""
+def show_top5_predictions(model, dataset, indices, class_names, device, save_path=None):
     model.eval()
     n = len(indices)
-    fig, axes = plt.subplots(n, 2, figsize=(14, 4 * n),
-                             gridspec_kw={'width_ratios': [1, 2]})
+    fig, axes = plt.subplots(n, 2, figsize=(14, 4 * n), gridspec_kw={'width_ratios': [1, 2]})
     if n == 1:
         axes = axes.reshape(1, -1)
 
@@ -157,10 +136,8 @@ def show_top5_predictions(model, dataset, indices, class_names, device,
         axes[row, 1].invert_yaxis()
 
         for bar, prob in zip(bars, top5_probs):
-            axes[row, 1].text(
-                bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2,
-                f'{prob:.1%}', va='center', fontsize=10
-            )
+            axes[row, 1].text(bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2,
+                              f'{prob:.1%}', va='center', fontsize=10)
 
     plt.tight_layout()
     if save_path:

@@ -12,6 +12,6 @@ pyyaml>=6.0
 # Level 2
 requests>=2.31.0
 
-# Level 3 (uncomment when needed)
-# gradio>=4.0.0
-# streamlit>=1.28.0
+# Level 3
+gradio>=4.0.0
+opencv-python>=4.8.0

@@ -1,26 +1,9 @@
-"""
-models.py — Model factory for food classification architectures.
-"""
-
 import torch
 import torch.nn as nn
 import torchvision.models as models
 
 
-def create_model(model_name='resnet50', num_classes=101, freeze_backbone=True,
-                 device=None):
-    """
-    Create a model with pre-trained backbone and new classification head.
-
-    Args:
-        model_name: 'resnet50' or 'mobilenetv3'
-        num_classes: number of output classes
-        freeze_backbone: if True, freeze all layers except classification head
-        device: torch device (auto-detected if None)
-
-    Returns:
-        model on the specified device
-    """
+def create_model(model_name='resnet50', num_classes=101, freeze_backbone=True, device=None):
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -42,9 +25,8 @@ def create_model(model_name='resnet50', num_classes=101, freeze_backbone=True,
         classifier_params = list(model.classifier.parameters())
 
     else:
-        raise ValueError(f'Unknown model: {model_name}. Use "resnet50" or "mobilenetv3".')
+        raise ValueError(f'Unknown model: {model_name}')
 
-    # Freeze backbone if requested
     if freeze_backbone:
         for param in model.parameters():
             param.requires_grad = False
@@ -55,41 +37,25 @@ def create_model(model_name='resnet50', num_classes=101, freeze_backbone=True,
 
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'{model_name.upper()} | Total: {total:,} | Trainable: {trainable:,}')
+    print(f'{model_name} | total params: {total:,} | trainable: {trainable:,}')
 
     return model
 
 
 def unfreeze_model(model):
-    """Unfreeze all model parameters for fine-tuning."""
     for param in model.parameters():
         param.requires_grad = True
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'All parameters unfrozen: {trainable:,} trainable')
+    print(f'unfrozen: {trainable:,} trainable params')
 
 
 def get_param_groups(model, model_name, backbone_lr=1e-5, head_lr=1e-4):
-    """
-    Create parameter groups with differential learning rates.
-
-    Args:
-        model: the model
-        model_name: 'resnet50' or 'mobilenetv3'
-        backbone_lr: learning rate for backbone layers
-        head_lr: learning rate for classification head
-
-    Returns:
-        list of param group dicts for optimizer
-    """
+    # use different learning rates for backbone vs head during fine-tuning
     if model_name == 'resnet50':
-        backbone_params = [
-            p for name, p in model.named_parameters() if 'fc' not in name
-        ]
+        backbone_params = [p for name, p in model.named_parameters() if 'fc' not in name]
         head_params = list(model.fc.parameters())
     elif model_name == 'mobilenetv3':
-        backbone_params = [
-            p for name, p in model.named_parameters() if 'classifier' not in name
-        ]
+        backbone_params = [p for name, p in model.named_parameters() if 'classifier' not in name]
         head_params = list(model.classifier.parameters())
     else:
         raise ValueError(f'Unknown model: {model_name}')

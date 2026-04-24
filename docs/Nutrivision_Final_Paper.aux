@@ -1,0 +1,72 @@
+\relax 
+\citation{he2016resnet}
+\citation{howard2019mobilenetv3}
+\citation{bossard2014food101}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Objectives and Scope}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Level 1: Food Classification}{1}{}\protected@file@percent }
+\citation{bossard2014food101}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Level 2: Nutrition Mapping and Multi-Food Handling}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Level 3: Explainability and Interactive Demo}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Assumptions and Limitations}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methods}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Dataset and Preprocessing}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Two-Phase Transfer Learning Strategy}{2}{}\protected@file@percent }
+\citation{he2016resnet}
+\citation{howard2019mobilenetv3}
+\citation{selvaraju2017gradcam}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Model Architectures}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Evaluation Metrics}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Nutrition Mapping and Database Construction}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Grad-CAM Implementation for Explainability}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}Interactive Gradio Demo}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Results and Discussion}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Classification Performance}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Model Performance Comparison}}{3}{}\protected@file@percent }
+\newlabel{tab:performance}{{I}{3}{}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Training Dynamics}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Error Analysis and Confusion Patterns}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Training curves showing loss and accuracy for both phases. Top: ResNet-50. Bottom: MobileNetV3. Vertical dashed line marks Phase 2 start.}}{4}{}\protected@file@percent }
+\newlabel{fig:training_curves}{{1}{4}{}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Most Confused Class Pairs (Top 10)}}{4}{}\protected@file@percent }
+\newlabel{tab:confused}{{II}{4}{}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Sample Predictions and Failure Analysis}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Complete confusion matrix showing strong diagonal with isolated off-diagonal patterns reflecting visual similarities between related dishes.}}{4}{}\protected@file@percent }
+\newlabel{fig:confusion_full}{{2}{4}{}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Confusion matrix for 15 most challenging classes, showing concentrated errors within food subcategories.}}{4}{}\protected@file@percent }
+\newlabel{fig:confusion_worst}{{3}{4}{}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Top-5 Prediction Analysis}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Correct predictions across diverse food categories demonstrating robustness.}}{5}{}\protected@file@percent }
+\newlabel{fig:correct_samples}{{4}{5}{}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Failure cases typically caused by poor lighting, unusual angles, or contextual ambiguity.}}{5}{}\protected@file@percent }
+\newlabel{fig:incorrect_samples}{{5}{5}{}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-F}}Nutrition Estimation Results}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-G}}Grad-CAM Explainability Results}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Top-5 predictions for challenging test images, demonstrating learned semantic hierarchies.}}{5}{}\protected@file@percent }
+\newlabel{fig:top5_preds}{{6}{5}{}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Calorie distribution across food categories showing realistic clustering by food type.}}{5}{}\protected@file@percent }
+\newlabel{fig:calorie_dist}{{7}{5}{}{figure.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Extra Credit: Multi-Food Analysis}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Calories vs. protein scatter plot showing high-protein items separating from high-calorie desserts.}}{6}{}\protected@file@percent }
+\newlabel{fig:cal_vs_protein}{{8}{6}{}{figure.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion and Future Work}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Key Contributions}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Summary of Achievements (Level 1, 2, 3)}{6}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Grad-CAM visualizations highlighting discriminative regions for different food categories.}}{6}{}\protected@file@percent }
+\newlabel{fig:gradcam_examples}{{9}{6}{}{figure.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Comparison of Grad-CAM patterns for correct (top) vs. incorrect (bottom) predictions.}}{7}{}\protected@file@percent }
+\newlabel{fig:gradcam_compare}{{10}{7}{}{figure.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Future Work and Extensions}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Multi-food detection identifying multiple items within a single image.}}{7}{}\protected@file@percent }
+\newlabel{fig:multi_food}{{11}{7}{}{figure.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Interactive Gradio demo showing complete pipeline functionality.}}{7}{}\protected@file@percent }
+\newlabel{fig:demo}{{12}{7}{}{figure.12}{}}
+\bibcite{bossard2014food101}{1}
+\bibcite{he2016resnet}{2}
+\bibcite{howard2019mobilenetv3}{3}
+\bibcite{selvaraju2017gradcam}{4}
+\bibcite{paszke2019pytorch}{5}
+\bibcite{usda2019fdc}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Broader Impact}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{8}{}\protected@file@percent }
+\gdef \@abspage@last{8}
